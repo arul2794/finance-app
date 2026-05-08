@@ -30,10 +30,11 @@
     input:focus, select:focus { outline: none; border-color: #0b2b44; }
     button { background: #0b2b44; color: white; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
     button:hover { opacity: 0.85; }
-    button.green { background: #059669; }
-    button.blue { background: #1d4ed8; }
-    button.gray { background: #64748b; }
+    button.green  { background: #059669; }
+    button.blue   { background: #1d4ed8; }
+    button.gray   { background: #64748b; }
     button.orange { background: #d97706; }
+    button.red    { background: #dc2626; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
     th { text-align: left; padding: 8px 5px; border-bottom: 2px solid #e2e8f0; color: #64748b; }
     td { padding: 8px 5px; border-bottom: 1px solid #f1f5f9; }
@@ -47,7 +48,7 @@
     .status.info { background: #eff6ff; color: #1e40af; }
     .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.55); z-index:1000; display:flex; align-items:center; justify-content:center; }
     .modal-overlay.hidden { display: none; }
-    .modal { background: white; border-radius: 20px; padding: 30px; max-width: 480px; width: 90%; }
+    .modal { background: white; border-radius: 20px; padding: 30px; max-width: 420px; width: 90%; }
     .modal h2 { color: #0b2b44; margin-bottom: 10px; }
     .modal .desc { color: #475569; font-size: 13px; line-height: 1.7; margin-bottom: 18px; background: #f8fafc; padding: 12px 15px; border-radius: 10px; border-left: 4px solid #0b2b44; }
     .modal label { font-size: 13px; color: #475569; font-weight: 600; display: block; margin: 12px 0 4px; }
@@ -61,48 +62,49 @@
     .badge.connected    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
     .badge.disconnected { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
     .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+    /* First time setup screen */
+    .setup-screen { text-align: center; padding: 60px 20px; }
+    .setup-screen h2 { color: #0b2b44; margin-bottom: 10px; font-size: 24px; }
+    .setup-screen p { color: #64748b; margin-bottom: 30px; font-size: 15px; }
+    .setup-screen .token-input { max-width: 400px; margin: 0 auto 15px; }
+    .setup-screen input { width: 100%; padding: 14px 18px; border-radius: 25px; border: 2px solid #e2e8f0; font-size: 15px; text-align: center; }
+    .setup-screen input:focus { outline: none; border-color: #0b2b44; }
   </style>
 </head>
 <body>
 
-<!-- Setup Modal -->
-<div class="modal-overlay" id="setupModal">
-  <div class="modal">
-    <h2>🔧 GitHub Setup</h2>
-    <div class="desc">
-      <strong>Two-repo setup (one time only):</strong><br>
-      1. Create a <strong>public</strong> repo called <code>finance-app</code> → upload this HTML → enable GitHub Pages<br>
-      2. Create a <strong>private</strong> repo called <code>finance-data</code> → this stores your data<br>
-      3. Generate a token with <strong>repo</strong> scope and enter below
-    </div>
-
-    <label>GitHub Username</label>
-    <input type="text" id="ghUser" placeholder="e.g. arul2794">
-
-    <label>Private Data Repo Name</label>
-    <input type="text" id="ghRepo" placeholder="e.g. finance-data">
-
-    <label>Personal Access Token</label>
-    <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="hint">github.com → Settings → Developer Settings → Personal access tokens → Tokens (classic) → Generate → tick ✅ repo</div>
-
-    <div class="modal-btns">
-      <button class="green" onclick="saveConfig()">✅ Save & Connect</button>
-      <button class="gray" onclick="closeModal()">Cancel</button>
+<!-- Token Setup Screen (shown only first time) -->
+<div id="tokenScreen" class="hidden">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(145deg, #f0f4f8, #d9e2ec);">
+    <div style="background:white; border-radius:30px; padding:40px; max-width:450px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.15); text-align:center;">
+      <div style="font-size:50px; margin-bottom:15px;">🔐</div>
+      <h2 style="color:#0b2b44; margin-bottom:10px;">One-Time Setup</h2>
+      <p style="color:#64748b; font-size:14px; line-height:1.7; margin-bottom:25px;">
+        Enter your GitHub Personal Access Token to connect.<br>
+        This is stored only in your browser — never shared.
+      </p>
+      <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%; padding:14px 18px; border-radius:25px; border:2px solid #e2e8f0; font-size:15px; margin-bottom:12px;">
+      <div style="font-size:11px; color:#94a3b8; margin-bottom:20px;">
+        github.com → Settings → Developer Settings → Personal access tokens → Tokens (classic) → Generate → tick ✅ repo
+      </div>
+      <button class="green" style="width:100%; padding:14px; border-radius:25px; font-size:15px;" onclick="submitToken()">🚀 Connect & Start</button>
     </div>
   </div>
 </div>
 
+<!-- Main App -->
+<div id="mainApp" class="hidden">
 <div class="container">
   <div class="topbar">
     <div>
       <h1>💼 Finance Tracker</h1>
-      <div id="connectionBadge"></div>
+      <span class="badge connected" id="connectionBadge">🟢 arul2794/finance-data</span>
     </div>
     <div class="sync-btns">
       <button class="green"  onclick="saveToGitHub()">☁️ Save</button>
       <button class="blue"   onclick="loadFromGitHub()">📥 Load</button>
-      <button class="orange" onclick="openModal()">⚙️ Settings</button>
+      <button class="orange" onclick="showTokenReset()">🔑 Token</button>
     </div>
   </div>
 
@@ -118,7 +120,7 @@
       <div class="bank-list" id="bankList"></div>
       <div class="input-row">
         <select id="savingsBank"><option>KVB</option><option>IDFC</option><option>Canara</option><option>DBS</option><option>Kotak</option><option>IndusInd</option><option>Airtel</option></select>
-        <input type="number" id="savingsAmount" placeholder="Amount ₹" min="1" style="width:120px;">
+        <input type="number" id="savingsAmount" placeholder="Amount ₹" min="1" style="width:130px;">
         <button onclick="addSavings()">💵 Add</button>
       </div>
     </div>
@@ -145,49 +147,73 @@
 
   <div class="status" id="statusMsg"></div>
 </div>
+</div>
 
 <script>
+// ======== HARDCODED CONFIG ========
+const GH_USER = 'arul2794';
+const GH_REPO = 'finance-data';
+const FILE    = 'finance-data.json';
+
+// ======== STATE ========
 const BANKS = ["KVB","IDFC","Canara","DBS","Kotak","IndusInd","Airtel"];
-let balances = {KVB:5000,IDFC:8000,Canara:4000,DBS:9000,Kotak:3000,IndusInd:6000,Airtel:2500};
+let balances = {KVB:0,IDFC:0,Canara:0,DBS:0,Kotak:0,IndusInd:0,Airtel:0};
 let expenses = [];
-let ghConfig = {user:'',repo:'',token:''};
-const FILE = 'finance-data.json';
+let token = '';
 
+// ======== INIT ========
 function init() {
-  try { const c = localStorage.getItem('ghConfig'); if(c) ghConfig=JSON.parse(c); } catch(e){}
-  try { const d = localStorage.getItem('financeData'); if(d){ const p=JSON.parse(d); balances=p.balances||balances; expenses=p.expenses||expenses; } } catch(e){}
-  updateBadge();
-  if (!ghConfig.token) document.getElementById('setupModal').classList.remove('hidden');
+  token = localStorage.getItem('ghToken') || '';
+
+  if (!token) {
+    // First time — show token screen
+    document.getElementById('tokenScreen').classList.remove('hidden');
+    document.getElementById('mainApp').classList.add('hidden');
+    return;
+  }
+
+  showApp();
+}
+
+function submitToken() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t || !t.startsWith('ghp_')) {
+    alert('Please enter a valid token starting with ghp_');
+    return;
+  }
+  token = t;
+  localStorage.setItem('ghToken', token);
+  document.getElementById('tokenScreen').classList.add('hidden');
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('tokenScreen').classList.add('hidden');
+
+  // Load local data first
+  try {
+    const d = localStorage.getItem('financeData');
+    if (d) { const p=JSON.parse(d); balances=p.balances||balances; expenses=p.expenses||expenses; }
+  } catch(e) {}
+
   renderAll();
+
+  // Auto load from GitHub
+  loadFromGitHub(true);
 }
 
-function saveConfig() {
-  const u=document.getElementById('ghUser').value.trim();
-  const r=document.getElementById('ghRepo').value.trim();
-  const t=document.getElementById('ghToken').value.trim();
-  if (!u||!r||!t) { alert('Please fill all 3 fields'); return; }
-  ghConfig={user:u,repo:r,token:t};
-  localStorage.setItem('ghConfig', JSON.stringify(ghConfig));
-  closeModal();
-  updateBadge();
-  showStatus('✅ Connected! Click Load to fetch your saved data.','good');
+function showTokenReset() {
+  if (confirm('Reset your GitHub token?')) {
+    localStorage.removeItem('ghToken');
+    token = '';
+    document.getElementById('tokenScreen').classList.remove('hidden');
+    document.getElementById('mainApp').classList.add('hidden');
+    document.getElementById('tokenInput').value = '';
+  }
 }
 
-function openModal() {
-  document.getElementById('ghUser').value=ghConfig.user;
-  document.getElementById('ghRepo').value=ghConfig.repo;
-  document.getElementById('ghToken').value=ghConfig.token;
-  document.getElementById('setupModal').classList.remove('hidden');
-}
-function closeModal() { document.getElementById('setupModal').classList.add('hidden'); }
-
-function updateBadge() {
-  const el = document.getElementById('connectionBadge');
-  el.innerHTML = ghConfig.token
-    ? `<span class="badge connected">🟢 ${ghConfig.user}/${ghConfig.repo}</span>`
-    : `<span class="badge disconnected">🔴 Not connected — click ⚙️ Settings</span>`;
-}
-
+// ======== RENDER ========
 function renderAll() {
   document.getElementById('bankList').innerHTML = BANKS.map(b =>
     `<div class="bank-item"><div class="name">${b}</div><div class="balance">₹${(balances[b]||0).toLocaleString('en-IN')}</div></div>`
@@ -217,13 +243,14 @@ function renderAll() {
   if (window.myChart) window.myChart.destroy();
   window.myChart = new Chart(document.getElementById('expenseChart').getContext('2d'), {
     type:'bar',
-    data:{ labels: labels.length?labels:['No data'], datasets:[{ data: values.length?values:[0], backgroundColor: labels.length?labels.map((_,i)=>colors[i%colors.length]):['#ddd'], borderRadius:8 }] },
+    data:{ labels:labels.length?labels:['No data'], datasets:[{data:values.length?values:[0], backgroundColor:labels.length?labels.map((_,i)=>colors[i%colors.length]):['#ddd'], borderRadius:8}] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>'₹'+v.toLocaleString('en-IN')}}} }
   });
 
   localStorage.setItem('financeData', JSON.stringify({balances,expenses}));
 }
 
+// ======== ACTIONS ========
 function addSavings() {
   const bank=document.getElementById('savingsBank').value;
   const amount=parseFloat(document.getElementById('savingsAmount').value);
@@ -253,17 +280,18 @@ function deleteExpense(idx) {
   renderAll();
 }
 
+// ======== STATUS ========
 function showStatus(msg,type='good') {
   const el=document.getElementById('statusMsg');
   el.textContent=msg; el.className='status show '+type;
   setTimeout(()=>el.className='status',6000);
 }
 
-function apiUrl()     { return `https://api.github.com/repos/${ghConfig.user}/${ghConfig.repo}/contents/${FILE}`; }
-function apiHeaders() { return {'Authorization':'Bearer '+ghConfig.token,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'}; }
+// ======== GITHUB ========
+function apiUrl()     { return `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE}`; }
+function apiHeaders() { return {'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'}; }
 
 async function saveToGitHub() {
-  if (!ghConfig.token) { openModal(); return; }
   showStatus('⏳ Saving to GitHub...','info');
   try {
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({balances,expenses},null,2))));
@@ -271,34 +299,40 @@ async function saveToGitHub() {
     try { const r=await fetch(apiUrl(),{headers:apiHeaders()}); if(r.ok){const j=await r.json();sha=j.sha;} } catch(e){}
     const res = await fetch(apiUrl(),{method:'PUT',headers:apiHeaders(),body:JSON.stringify({message:'Finance update '+new Date().toLocaleString('en-IN'),content:encoded,...(sha&&{sha})})});
     if (res.ok) {
-      showStatus('✅ Saved to GitHub successfully!','good');
+      showStatus('✅ Saved to GitHub!','good');
     } else {
       const err=await res.json();
-      if (res.status===401) showStatus('❌ Invalid token — re-enter in ⚙️ Settings','bad');
-      else if (res.status===404) showStatus('❌ Repo not found — check name in ⚙️ Settings','bad');
+      if (res.status===401) showStatus('❌ Invalid token — click 🔑 Token to reset','bad');
+      else if (res.status===404) showStatus('❌ Repo not found — check finance-data exists','bad');
       else showStatus('❌ Error: '+(err.message||res.status),'bad');
     }
   } catch(e) { showStatus('❌ Network error: '+e.message,'bad'); }
 }
 
-async function loadFromGitHub() {
-  if (!ghConfig.token) { openModal(); return; }
-  showStatus('⏳ Loading from GitHub...','info');
+async function loadFromGitHub(silent=false) {
+  if (!silent) showStatus('⏳ Loading from GitHub...','info');
   try {
     const res = await fetch(apiUrl(),{headers:apiHeaders()});
-    if (res.status===404) { showStatus('⚠️ No saved data yet — add data and Save first!','bad'); return; }
-    if (res.status===401) { showStatus('❌ Invalid token — re-enter in ⚙️ Settings','bad'); return; }
-    if (!res.ok) { showStatus('❌ Error: '+res.status,'bad'); return; }
+    if (res.status===404) {
+      if (!silent) showStatus('⚠️ No saved data yet — add balances and click Save!','bad');
+      return;
+    }
+    if (res.status===401) {
+      showStatus('❌ Invalid token — click 🔑 Token to reset','bad');
+      return;
+    }
+    if (!res.ok) { if(!silent) showStatus('❌ Error: '+res.status,'bad'); return; }
     const file=await res.json();
     const decoded=decodeURIComponent(escape(atob(file.content.replace(/\n/g,''))));
     const data=JSON.parse(decoded);
     balances=data.balances||balances;
     expenses=data.expenses||expenses;
     renderAll();
-    showStatus('✅ Data loaded from GitHub!','good');
-  } catch(e) { showStatus('❌ Failed: '+e.message,'bad'); }
+    if (!silent) showStatus('✅ Data loaded from GitHub!','good');
+  } catch(e) { if(!silent) showStatus('❌ Failed: '+e.message,'bad'); }
 }
 
+// ======== START ========
 init();
 </script>
 </body>
