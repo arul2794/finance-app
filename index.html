@@ -34,7 +34,6 @@
     button.blue   { background: #1d4ed8; }
     button.gray   { background: #64748b; }
     button.orange { background: #d97706; }
-    button.red    { background: #dc2626; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
     th { text-align: left; padding: 8px 5px; border-bottom: 2px solid #e2e8f0; color: #64748b; }
     td { padding: 8px 5px; border-bottom: 1px solid #f1f5f9; }
@@ -46,50 +45,36 @@
     .status.good { background: #f0fdf4; color: #166534; }
     .status.bad  { background: #fef2f2; color: #dc2626; }
     .status.info { background: #eff6ff; color: #1e40af; }
-    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.55); z-index:1000; display:flex; align-items:center; justify-content:center; }
-    .modal-overlay.hidden { display: none; }
-    .modal { background: white; border-radius: 20px; padding: 30px; max-width: 420px; width: 90%; }
-    .modal h2 { color: #0b2b44; margin-bottom: 10px; }
-    .modal .desc { color: #475569; font-size: 13px; line-height: 1.7; margin-bottom: 18px; background: #f8fafc; padding: 12px 15px; border-radius: 10px; border-left: 4px solid #0b2b44; }
-    .modal label { font-size: 13px; color: #475569; font-weight: 600; display: block; margin: 12px 0 4px; }
-    .modal input { width: 100%; border-radius: 10px; padding: 11px 14px; border: 1px solid #ddd; font-size: 14px; }
-    .modal input:focus { outline: none; border-color: #0b2b44; }
-    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-    .modal-btns button { flex: 1; padding: 12px; border-radius: 25px; }
     .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .sync-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; margin-top: 5px; }
-    .badge.connected    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-    .badge.disconnected { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
-    .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; margin-top: 5px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
 
-    /* First time setup screen */
-    .setup-screen { text-align: center; padding: 60px 20px; }
-    .setup-screen h2 { color: #0b2b44; margin-bottom: 10px; font-size: 24px; }
-    .setup-screen p { color: #64748b; margin-bottom: 30px; font-size: 15px; }
-    .setup-screen .token-input { max-width: 400px; margin: 0 auto 15px; }
-    .setup-screen input { width: 100%; padding: 14px 18px; border-radius: 25px; border: 2px solid #e2e8f0; font-size: 15px; text-align: center; }
-    .setup-screen input:focus { outline: none; border-color: #0b2b44; }
+    /* Lock Screen */
+    #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(145deg, #0b2b44, #1e4a6e); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    #lockScreen.hidden { display: none; }
+    .lock-box { background: white; border-radius: 30px; padding: 40px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+    .lock-icon { font-size: 55px; margin-bottom: 15px; }
+    .lock-box h2 { color: #0b2b44; margin-bottom: 8px; font-size: 22px; }
+    .lock-box p { color: #64748b; font-size: 13px; margin-bottom: 25px; }
+    .lock-box input { width: 100%; padding: 14px 18px; border-radius: 25px; border: 2px solid #e2e8f0; font-size: 16px; text-align: center; letter-spacing: 3px; margin-bottom: 12px; }
+    .lock-box input:focus { outline: none; border-color: #0b2b44; }
+    .lock-box button { width: 100%; padding: 14px; border-radius: 25px; font-size: 15px; }
+    .lock-error { color: #dc2626; font-size: 13px; margin-top: 10px; min-height: 20px; font-weight: 600; }
+    .lock-attempts { color: #94a3b8; font-size: 12px; margin-top: 6px; }
   </style>
 </head>
 <body>
 
-<!-- Token Setup Screen (shown only first time) -->
-<div id="tokenScreen" class="hidden">
-  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(145deg, #f0f4f8, #d9e2ec);">
-    <div style="background:white; border-radius:30px; padding:40px; max-width:450px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.15); text-align:center;">
-      <div style="font-size:50px; margin-bottom:15px;">🔐</div>
-      <h2 style="color:#0b2b44; margin-bottom:10px;">One-Time Setup</h2>
-      <p style="color:#64748b; font-size:14px; line-height:1.7; margin-bottom:25px;">
-        Enter your GitHub Personal Access Token to connect.<br>
-        This is stored only in your browser — never shared.
-      </p>
-      <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%; padding:14px 18px; border-radius:25px; border:2px solid #e2e8f0; font-size:15px; margin-bottom:12px;">
-      <div style="font-size:11px; color:#94a3b8; margin-bottom:20px;">
-        github.com → Settings → Developer Settings → Personal access tokens → Tokens (classic) → Generate → tick ✅ repo
-      </div>
-      <button class="green" style="width:100%; padding:14px; border-radius:25px; font-size:15px;" onclick="submitToken()">🚀 Connect & Start</button>
-    </div>
+<!-- Lock Screen -->
+<div id="lockScreen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h2>Finance Tracker</h2>
+    <p>Enter your password to continue</p>
+    <input type="password" id="passwordInput" placeholder="••••••••" maxlength="20" onkeydown="if(event.key==='Enter') checkPassword()">
+    <button class="green" onclick="checkPassword()">🔓 Unlock</button>
+    <div class="lock-error" id="lockError"></div>
+    <div class="lock-attempts" id="lockAttempts"></div>
   </div>
 </div>
 
@@ -99,12 +84,12 @@
   <div class="topbar">
     <div>
       <h1>💼 Finance Tracker</h1>
-      <span class="badge connected" id="connectionBadge">🟢 arul2794/finance-data</span>
+      <span class="badge">🟢 arul2794 / finance-data</span>
     </div>
     <div class="sync-btns">
       <button class="green"  onclick="saveToGitHub()">☁️ Save</button>
       <button class="blue"   onclick="loadFromGitHub()">📥 Load</button>
-      <button class="orange" onclick="showTokenReset()">🔑 Token</button>
+      <button class="gray"   onclick="lockApp()">🔒 Lock</button>
     </div>
   </div>
 
@@ -150,67 +135,72 @@
 </div>
 
 <script>
-// ======== HARDCODED CONFIG ========
-const GH_USER = 'arul2794';
-const GH_REPO = 'finance-data';
-const FILE    = 'finance-data.json';
+// ======== CONFIG (private — protected by password) ========
+const GH_USER  = 'arul2794';
+const GH_REPO  = 'finance-data';
+const GH_TOKEN = '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';
+const FILE     = 'finance-data.json';
+const PASSWORD = 'Amman2794';  // ← Change this to your desired password
 
 // ======== STATE ========
 const BANKS = ["KVB","IDFC","Canara","DBS","Kotak","IndusInd","Airtel"];
 let balances = {KVB:0,IDFC:0,Canara:0,DBS:0,Kotak:0,IndusInd:0,Airtel:0};
 let expenses = [];
-let token = '';
+let attempts = 0;
+const MAX_ATTEMPTS = 5;
 
-// ======== INIT ========
-function init() {
-  token = localStorage.getItem('ghToken') || '';
+// ======== PASSWORD ========
+function checkPassword() {
+  const input = document.getElementById('passwordInput').value;
+  const errEl = document.getElementById('lockError');
+  const attEl = document.getElementById('lockAttempts');
 
-  if (!token) {
-    // First time — show token screen
-    document.getElementById('tokenScreen').classList.remove('hidden');
-    document.getElementById('mainApp').classList.add('hidden');
-    return;
+  if (input === PASSWORD) {
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    document.getElementById('passwordInput').value = '';
+    errEl.textContent = '';
+    attEl.textContent = '';
+    attempts = 0;
+    loadData();
+  } else {
+    attempts++;
+    const remaining = MAX_ATTEMPTS - attempts;
+    errEl.textContent = '❌ Wrong password!';
+    attEl.textContent = remaining > 0 ? `${remaining} attempts remaining` : '';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+
+    if (attempts >= MAX_ATTEMPTS) {
+      errEl.textContent = '🔴 Too many attempts. Try again in 30 seconds.';
+      document.getElementById('passwordInput').disabled = true;
+      document.querySelector('.lock-box button').disabled = true;
+      setTimeout(() => {
+        attempts = 0;
+        document.getElementById('passwordInput').disabled = false;
+        document.querySelector('.lock-box button').disabled = false;
+        errEl.textContent = '';
+        attEl.textContent = '';
+      }, 30000);
+    }
   }
-
-  showApp();
 }
 
-function submitToken() {
-  const t = document.getElementById('tokenInput').value.trim();
-  if (!t || !t.startsWith('ghp_')) {
-    alert('Please enter a valid token starting with ghp_');
-    return;
-  }
-  token = t;
-  localStorage.setItem('ghToken', token);
-  document.getElementById('tokenScreen').classList.add('hidden');
-  showApp();
+function lockApp() {
+  document.getElementById('lockScreen').classList.remove('hidden');
+  document.getElementById('mainApp').classList.add('hidden');
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('passwordInput').focus();
 }
 
-function showApp() {
-  document.getElementById('mainApp').classList.remove('hidden');
-  document.getElementById('tokenScreen').classList.add('hidden');
-
-  // Load local data first
+// ======== LOAD DATA ========
+function loadData() {
   try {
     const d = localStorage.getItem('financeData');
     if (d) { const p=JSON.parse(d); balances=p.balances||balances; expenses=p.expenses||expenses; }
   } catch(e) {}
-
   renderAll();
-
-  // Auto load from GitHub
   loadFromGitHub(true);
-}
-
-function showTokenReset() {
-  if (confirm('Reset your GitHub token?')) {
-    localStorage.removeItem('ghToken');
-    token = '';
-    document.getElementById('tokenScreen').classList.remove('hidden');
-    document.getElementById('mainApp').classList.add('hidden');
-    document.getElementById('tokenInput').value = '';
-  }
 }
 
 // ======== RENDER ========
@@ -289,7 +279,7 @@ function showStatus(msg,type='good') {
 
 // ======== GITHUB ========
 function apiUrl()     { return `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE}`; }
-function apiHeaders() { return {'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'}; }
+function apiHeaders() { return {'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'}; }
 
 async function saveToGitHub() {
   showStatus('⏳ Saving to GitHub...','info');
@@ -302,8 +292,8 @@ async function saveToGitHub() {
       showStatus('✅ Saved to GitHub!','good');
     } else {
       const err=await res.json();
-      if (res.status===401) showStatus('❌ Invalid token — click 🔑 Token to reset','bad');
-      else if (res.status===404) showStatus('❌ Repo not found — check finance-data exists','bad');
+      if (res.status===401) showStatus('❌ Token expired — please regenerate','bad');
+      else if (res.status===404) showStatus('❌ Repo not found','bad');
       else showStatus('❌ Error: '+(err.message||res.status),'bad');
     }
   } catch(e) { showStatus('❌ Network error: '+e.message,'bad'); }
@@ -313,14 +303,8 @@ async function loadFromGitHub(silent=false) {
   if (!silent) showStatus('⏳ Loading from GitHub...','info');
   try {
     const res = await fetch(apiUrl(),{headers:apiHeaders()});
-    if (res.status===404) {
-      if (!silent) showStatus('⚠️ No saved data yet — add balances and click Save!','bad');
-      return;
-    }
-    if (res.status===401) {
-      showStatus('❌ Invalid token — click 🔑 Token to reset','bad');
-      return;
-    }
+    if (res.status===404) { if(!silent) showStatus('⚠️ No saved data yet — add balances and Save!','bad'); return; }
+    if (res.status===401) { showStatus('❌ Token expired — please regenerate token','bad'); return; }
     if (!res.ok) { if(!silent) showStatus('❌ Error: '+res.status,'bad'); return; }
     const file=await res.json();
     const decoded=decodeURIComponent(escape(atob(file.content.replace(/\n/g,''))));
@@ -328,12 +312,12 @@ async function loadFromGitHub(silent=false) {
     balances=data.balances||balances;
     expenses=data.expenses||expenses;
     renderAll();
-    if (!silent) showStatus('✅ Data loaded from GitHub!','good');
+    if (!silent) showStatus('✅ Data loaded!','good');
   } catch(e) { if(!silent) showStatus('❌ Failed: '+e.message,'bad'); }
 }
 
 // ======== START ========
-init();
+document.getElementById('passwordInput').focus();
 </script>
 </body>
 </html>
